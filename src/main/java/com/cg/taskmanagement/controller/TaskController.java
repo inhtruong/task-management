@@ -42,7 +42,7 @@ public class TaskController {
     public ModelAndView showUpdateTaskForm(@PathVariable Long id) {
         ModelAndView modelAndView = new ModelAndView("update-task");
         // Thêm các thông tin cần thiết vào model and view (nếu cần)
-        modelAndView.addObject("taskDto", taskService.findById(id));
+        modelAndView.addObject("taskDto", taskService.findById(id).get());
         return modelAndView;
     }
 
@@ -50,6 +50,23 @@ public class TaskController {
     public ModelAndView updateTask(@ModelAttribute("taskDto") TaskDto taskDto) {
         // Xử lý lưu param dto vào model và save task
         TaskDto updateTask = taskService.updateTask(taskDto);
+        ModelAndView modelAndView = new ModelAndView("redirect:/tasks");
+        // Thêm các thông tin cần thiết vào model and view (nếu cần)
+        return modelAndView;
+    }
+
+    @GetMapping("/delete/{id}")
+    public ModelAndView showDeleteTaskForm(@PathVariable Long id) {
+        ModelAndView modelAndView = new ModelAndView("delete-task");
+        // Thêm các thông tin cần thiết vào model and view (nếu cần)
+        modelAndView.addObject("taskDto", taskService.findById(id).get());
+        return modelAndView;
+    }
+
+    @DeleteMapping("/delete")
+    public ModelAndView deleteTask(@ModelAttribute("taskDto") TaskDto taskDto) {
+        // Xử lý lưu param dto vào model và save task
+        taskService.deleteTask(taskDto.getId());
         ModelAndView modelAndView = new ModelAndView("redirect:/tasks");
         // Thêm các thông tin cần thiết vào model and view (nếu cần)
         return modelAndView;

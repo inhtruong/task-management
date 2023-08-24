@@ -13,5 +13,8 @@ public interface TaskService extends IGeneralService<TaskDto> {
     List<TaskDto> getAllTasksForToday();
 
     TaskDto createTask(TaskDto taskDto);
+
     TaskDto updateTask(TaskDto taskDto);
+
+    void deleteTask(Long taskId);
 }

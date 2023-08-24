@@ -31,7 +31,7 @@
             <td th:text="${task.status}"></td>
             <td class="d-flex">
                 <a class="btn btn-warning" th:href="@{/tasks/update/{id}(id=${task.id})}">Edit</a>
-                <a class="btn btn-outline-danger" th:if="${task.status == 'DONE'}" th:href="@{/tasks/delete/{id}(id=${task.id})}">Delete</a>
+                <a class="btn btn-outline-danger" th:href="@{/tasks/delete/{id}(id=${task.id})}">Delete</a>
             </td>
         </tr>
         </tbody>

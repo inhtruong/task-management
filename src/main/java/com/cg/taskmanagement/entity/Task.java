@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(schema = "tasks")
+@Table(name = "tasks")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +28,14 @@ public class Task {
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime end;
 
-    @Enumerated(EnumType.STRING) // Sử dụng EnumType.STRING để ánh xạ tới tên giá trị enum
+    @Enumerated(value = EnumType.STRING) // Sử dụng EnumType.STRING để ánh xạ tới tên giá trị enum
+    @Column(columnDefinition = "enum('TODO', 'IN_PROGRESS', 'DISMISS', 'DONE')")
     private TaskStatus status;
 
-    @Enumerated(EnumType.STRING) // Sử dụng EnumType.STRING để ánh xạ tới tên giá trị enum
+    @Enumerated(value = EnumType.STRING) // Sử dụng EnumType.STRING để ánh xạ tới tên giá trị enum
+    @Column(columnDefinition = "enum('DAILY', 'NONE_DAILY')")
     private TaskType type;
+
+    @Column(columnDefinition = "BOOLEAN")
+    private Boolean deleted;
 }

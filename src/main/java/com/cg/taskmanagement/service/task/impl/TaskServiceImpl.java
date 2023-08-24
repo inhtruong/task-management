@@ -4,11 +4,14 @@ import com.cg.taskmanagement.dto.TaskDto;
 import com.cg.taskmanagement.entity.Task;
 import com.cg.taskmanagement.entity.enumration.TaskStatus;
 import com.cg.taskmanagement.entity.enumration.TaskType;
+import com.cg.taskmanagement.exception.TaskNotFoundException;
 import com.cg.taskmanagement.repository.TaskRepository;
 import com.cg.taskmanagement.service.task.TaskService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +24,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    private static ModelMapper modelMapper;
 
     /**
      * @return
@@ -67,8 +72,22 @@ public class TaskServiceImpl implements TaskService {
         List<Task> taskList = taskRepository.findTasksFromToday();
 
         return taskList.stream()
-                .map(this::mapTaskToDTO)
+                .map(this::mapTaskToDTOConvertTime)
                 .collect(Collectors.toList());
+    }
+
+    private TaskDto mapTaskToDTOConvertTime(Task task) {
+        TaskDto taskDto = new TaskDto();
+
+        taskDto.setId(task.getId());
+        taskDto.setTitle(task.getTitle());
+        taskDto.setDescription(task.getDescription());
+        taskDto.setStart(task.getStart().toLocalTime().toString());
+        taskDto.setEnd(task.getStart().toLocalTime().toString());
+        taskDto.setStatus(task.getStatus().toString());
+        taskDto.setType(task.getType().toString());
+
+        return taskDto;
     }
 
     /**
@@ -76,6 +95,7 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
+    @Transactional
     public TaskDto createTask(TaskDto taskDto) {
         Task task = mapDTOToTask(taskDto);
 
@@ -84,6 +104,7 @@ public class TaskServiceImpl implements TaskService {
         LocalDate localDate = LocalDateTime.parse(taskDto.getStart()).toLocalDate();
         TaskType taskType = LocalDate.now().equals(localDate) ? TaskType.DAILY : TaskType.NONE_DAILY;
         task.setType(taskType);
+        task.setDeleted(false);
 
         Task savedTask = taskRepository.save(task);
         return mapTaskToDTO(savedTask);
@@ -94,6 +115,7 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
+    @Transactional
     public TaskDto updateTask(TaskDto taskDto) {
         Task existingTask = taskRepository.findById(taskDto.getId())
                 .orElseThrow(() -> new NoSuchElementException("Task not found"));
@@ -107,6 +129,20 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(existingTask);
         return mapTaskToDTO(updatedTask);
+    }
+
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public void deleteTask(Long id) {
+        Task task = taskRepository.findByIdAndDeleted(id, false);
+        if (task == null) {
+            throw new TaskNotFoundException("Task not found");
+        }
+        task.setDeleted(true);
+        taskRepository.save(task);
     }
 
     private TaskDto mapTaskToDTO(Task task) {
